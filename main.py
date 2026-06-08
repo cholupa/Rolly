@@ -1,7 +1,6 @@
-#--MAIN--#
-# The main loop to run the rolly loop
-# The main file is in charge of the main loop, managing the client side of the program, and handles the database communication
-
+# main loop for the robot
+# main boot will start in the idle state
+# as the states cycle the button press will start the repeat variable to True and auto cycle when the idle state is hit moving on to the next state until the button is pressed again. There will be timed pauses inbetween states to allow easier use to press the button again if needed to stop the loop
 
 import rolly
 from db import database
@@ -9,10 +8,13 @@ import numpy
 import RPi.GPIO as GPIO
 import lgpio
 import redis
+
 from time import time,sleep
+from datetime import datetime
+import math
 
 
-import client
+from client import BotClient
 import threading
 
 
@@ -22,10 +24,28 @@ DEBUG = True
 # set the board 
 GPIO.setmode(GPIO.BCM)
 
+#HOST and PORT
+HOST = '10.0.0.232'
+PORT = 5000
+
+
+# The currentPath are the steps that the robot takes during a run.
+# The first step is always registering the origin and a time stamp.
+# Each step will have a time stamp
+timeStamp = datetime.now().strftime('%b %d %H:%M:%S')
+
+
+
 def main():
 
     # create the database connection
-    database.startCon()
+    dbConn = database.startCon()
+    # flushing for testing
+    dbConn.flushdb()
+
+    # start the client
+    client = BotClient(HOST, PORT)
+
 
     # loop controller
     repeat = True
@@ -36,30 +56,48 @@ def main():
     # test all devices
 
     bot.servo.centerServo()
-    currentDistance = bot.echoSensor.pulse()
+    #currentDistance = bot.echoSensor.pulse()
     #motors move forward, then backward
+    stepCount = 1
+    pathNum = 1
 
-    origin = numpy.zeros(2)
 
-    steps = 0
-# within the repeat the client connections to the server are constantly being made and closed, the server will constantly accept connections, but the client calling to the server if it is off will throw an error and crash the program. This is why it is put in its own thread, and put into a try block separated from the bot.run() loop.
     while repeat:
-        try:
-            client.send_async(bot.currentDistance)
-        except(ConnectionRefusedError):
-            print("Connection disrupted")
-        
-        try:
-            bot.run()
-            print(f"Distance:{currentDistance}")
-        except(KeyboardInterrupt,MemoryError):
-            repeat = False
-            print("Cleaning up")
-            sleep(1)
-            # as an additional safeguard use GPIO to also clean pins in case gpiozero does not catch
-            GPIO.cleanup()
-    lgpio.gpiochip_close(bot.servo.h)
+        print("Current Step "+str(stepCount))
+        if stepCount <= 32:
+            try:
+                print("Running bot loop")
+                bot.run()
+                turn, distance = bot.packAction()
+                sleep(1)
+            except(KeyboardInterrupt,MemoryError):
+                repeat = False
+                print("Cleaning up")
+                sleep(1)
+            if turn is not None and distance is not None:
+                timeStamp = datetime.now().strftime('%b %d %H:%M:%S')
+                currentPath = database.create(dbConn, pathNum, stepCount, distance, turn, timeStamp)
+                #forward values to server--> get current record
+                latestPath = database.getLatest(dbConn, pathNum)
+                # any step in the path will be a distance and a direction = stepVals
+                try:
+                    print(latestPath['distance'])
+                    print(latestPath['turn'])
+                    client.send_async(int(float(latestPath['distance'])), int(latestPath['turn']))
+                    sleep(1)
+                except ConnectionRefusedError:
+                    print("Unable to send")
+
+                
+
+        elif stepCount > 32:
+            pathNum += 1
+            stepCount = 0
+        stepCount = stepCount + 1
     GPIO.cleanup()
+    print(dbConn.hgetall('P1:S2'))
+    dbConn.close()
+
 
 
 

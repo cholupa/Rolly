@@ -8,21 +8,19 @@
 # ServoDriver
 # Rolly
 #
-# Rolly is a composite of the driver classes to encase the functions of the peripherals into a single class.
+# Rolly is a composite of the driver classes to make the full FSM
 #
 #
 #
 #
 #
-#UPDATES: Button class removed, runs begin from computer through ssh connection, new motor driver chips ordered
-
+#UPDATES: Button class removed, runs begin from computer through ssh connection, 
 #
 #####################
 
-import RPi.GPIO as GPIOHave you changed your career plans? If so, what prompted this change? If not, why have you remained with your original plan?
-How has your thinking about your career evolved?
-Have you completed any research about your choice of career? How has this impacted your thinking? Have you thought about seeking an advanced degree or certification after earning your undergraduate degree?
-Which course outcomes have you achieved so far, and which ones remain?
+
+import RPi.GPIO as GPIO
+
 
 from time import sleep, time
 
@@ -49,14 +47,11 @@ if DEBUG:
 
 
 # set the board mode --> send to main.py
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BOARD)
 
-# -MotorDriver class controls the DC motors for wheel movements using Have you changed your career plans? If so, what prompted this change? If not, why have you remained with your original plan?
-How has your thinking about your career evolved?
-Have you completed any research about your choice of career? How has this impacted your thinking? Have you thought about seeking an advanced degree or certification after earning your undergraduate degree?
-Which course outcomes have you achieved so far, and which ones remain?PWM
-# -The motor is controlled physically by using the TB6612FNG driver chip and powered by a separate power supply module 9V
-# -Only use 2 driver wheels for motion, 2 sets of 2 wheels altogether. The drive wheels are positioned in the center of the bot for
+# -MotorDriver class controls the DC motors for wheel movements using PWM
+# -The motor is controlled physically by using the L293D driver chip and powered by a separate power supply module 9V
+# -Only use 2 driver wheels for motion, 3 sets of wheels altogether. The drive wheels are positioned in the center of the bot for
 #  easier turning
 
 class MotorDriver:
@@ -75,10 +70,6 @@ class MotorDriver:
 #    PWMEN2 = 21
 #    DIRFOR2 = 16
 #    DIRREV2 = 20
-
-    # 5 main functions to drive the wheels
-    # adjusting the dutycycle for the PWM functions will affect the speed, always have the speed be the same for both wheels.
-    # in the cases of turning, the drive wheels run in opposite directions to create turning affect, which is just switching power direction on the motors
     def __init__(self):
         self.leftW = PWMLED(self.LEFTW)
         self.rightW = PWMLED(self.RIGHTW)
@@ -92,11 +83,11 @@ class MotorDriver:
         self.leftW.pulse(0.4, 0.4, None, True)
         self.rightW.pulse(0.4, 0.4, None, True)
 
-    def turnLeft(self, motorL, motorR):
+    def turnLeft(self):
         self.leftW.pulse(1.0, 1.0, None, True)
         self.rightW.off()
 
-    def turnRight(self, motorL, motorR):
+    def turnRight(self):
         self.rightW.pulse(1.0, 1.0,None, True)
         self.leftW.off()
 
@@ -110,43 +101,47 @@ class MotorDriver:
 
 class ServoDriver:
 
+#    use Rpi.GPIO
+
     # Maintain a clamp within the bounds of the motor pulse capabilities
-    MAXPW = 2200
-    MINPW = 500
+    MAXP = 2000
+    CENTERP = 1500
+    MINPW = 1000
+    currentDC = 0
+
+    MINDC = 2
+    MAXDC = 12
 
     pin = 25
-    h = lgpio.gpiochip_open(0)
-    currentPulseW = 1500
+    GPIO.setup(pin, GPIO.OUT)
+    servo = GPIO.PWM(pin, 50)
+    servo.start(0)
+    sleep(2)
 
-    def setPulse(self, us):
-        us = max(self.MINPW, min(self.MAXPW, us))
-        self.currentPulseW = us
-        lgpio.tx_servo(self.h, self.pin, us)
+    #h = lgpio.gpiochip_open(0)
+    #currentPulseW = 1500
 
-    # Sweep function that slows the roational speed of the servo motor. This is used to make sure the echo sensor can make accurate readings from front, 
-    # left, and right directions the number of steps involved in the turns is the main driver for maipulating the speed of the turn.
-
-    def sweep(self,target, steps=100, delay=0.02):
-        start = self.currentPulseW
-        target = max(self.MINPW,min(self.MAXPW,target))
-        step = (target - start) / steps
-        for i in range(steps + 1):
-            us = int(start + step * i)
-            self.setPulse(us)
-            sleep(delay)
+    def setPulse(self):
+        #lgpio.tx_pwm(self.h, self.pin, 50, 10,pulse_offset=0, pulse_cycles=0)
+        self.servo.ChangeDutyCycle(self.currentDC)
 
 
-    # three main movements of the sensor, instead of constantly moving from one side to the other, have 3 set positions for it to rotate to.
-    def centerServo(self,pulse=1500):
-        self.sweep(pulse)
+    def sweep(self,target):
+        self.servo.ChangeDutyCycle(target)
+        sleep(1)
+        self.servo.ChangeDutyCycle(0)
+
+
+    def centerServo(self,duty=7):
+        self.sweep(duty)
         sleep(2)
 
-    def turnLeft(self,pulse=2200):
-        self.sweep(pulse)
+    def turnLeft(self,duty=12):
+        self.sweep(duty)
         sleep(2)
 
-    def turnRight(self,pulse=500):
-        self.sweep(pulse)
+    def turnRight(self, duty=2):
+        self.sweep(duty)
         sleep(2)
 
 
@@ -177,8 +172,6 @@ class EchoDriver:
         sleep(1)
         elapsedTime = endTime -startTime
         distance = (elapsedTime * 34300) / 2
-        print("Outside of loop!")
-        print(f"{distance}")
 
         return distance
 
@@ -189,24 +182,23 @@ class EchoDriver:
 
 class Rolly(StateMachine):
 
-    # Distance references for the state machine to work off of throughout the run. The threshold is the minimum distance the bot can be from an obstruction in its line of vision.
+    
     currentDistance = 0
     leftDistance = 0
     rightDistance = 0
+    direction = 0
     threshold = 20.0
 
+    currentAction = {}
+
     # States of the machine
-
-    # Instead of having a linear cycle of states from one ot another, there are multiple branches from one state to others in order to cover more scenarios. There is a possibility that while in the sweeping state, all three directions can be less than the threshold or essentially be blocked on all sides.
-    # In this case a reverse function will be implemented upon obtaining the new parts.
-
     idle = State(initial=True) # a default state for the bot to begin in
     sensing = State() # the distance sensing directly in front
     sweeping = State() # read distances from left and right sides to determine open area
     turning = State() # turn the actual bot in the chosen direction
     moving = State() # drive bot in the chosen direction
 
-    # events, conditions are added because of the chances of encountereing obstructions or having an open area. Otherwise soft locks can occur if the conditions are not included, or more states would be needed, adding unecessary states and transitions
+    # events
     startSensing = idle.to(sensing)
     senseToSweep = sensing.to(sweeping, cond="obstructed")
     senseToMove = sensing.to(moving, cond="all_clear")
@@ -223,7 +215,11 @@ class Rolly(StateMachine):
     movementLED = PWMLED(13)
     dbWriteLED = PWMLED(19)
 
-    # make objects for physical components within the rolly class
+
+
+
+
+    # instance all physical components within the rolly class
 
     echoSensor = EchoDriver()
     servo = ServoDriver()
@@ -234,11 +230,19 @@ class Rolly(StateMachine):
     i2c = board.I2C()
     thSensor = adafruit_ahtx0.AHTx0(i2c)
 
+    def packAction(self):
+        #self.currentAction['distance'] = self.currentDistance
+        if self.leftDistance > self.rightDistance:
+            self.direction = -90
+        elif self.leftDistance < self.rightDistance:
+            self.direction = 90
+        elif self.currentDistance > self.threshold:
+            self.direction = 0
+        return self.direction, self.currentDistance
 
-    # transition functions between statesHave you changed your career plans? If so, what prompted this change? If not, why have you remained with your original plan?
-How has your thinking about your career evolved?
-Have you completed any research about your choice of career? How has this impacted your thinking? Have you thought about seeking an advanced degree or certification after earning your undergraduate degree?
-Which course outcomes have you achieved so far, and which ones remain?
+
+
+    # transition functions between states
     # This is where the physical components are to make their changes. These functions are automatically found and ran when the state cycles from one to the next.
 
     # when entering the idle state, the bot should have the sensor centered
@@ -246,6 +250,7 @@ Which course outcomes have you achieved so far, and which ones remain?
         if DEBUG:
             print("Entering Idle")
         self.baseLED.on()
+
     def on_exit_idle(self):
         if DEBUG:
             print("Exiting Idle")
@@ -262,7 +267,6 @@ Which course outcomes have you achieved so far, and which ones remain?
         self.baseLED.off()
     def on_enter_sweeping(self):
         self.baseLED.pulse(0.1,0.1,None,True)
-        
         self.servo.turnLeft()
         self.leftDistance = self.echoSensor.pulse()
 
@@ -297,9 +301,7 @@ Which course outcomes have you achieved so far, and which ones remain?
             print("Exiting a turn")
         self.movementLED.off()
         self.motors.stop()
-
-    # The run is the main loop for the rolly class. The loop is repeated within the main.py but the function calls are not used in main. This encapsulates the robot class and mechanics, making the main file more clean.
-    # This run is a series of conditionals that move from one state to the next depending on whether or not the robot has encountered an obstruction in its path.
+    
     def run(self):
         self.update()
         if self.idle.is_active:
@@ -307,7 +309,7 @@ Which course outcomes have you achieved so far, and which ones remain?
         elif self.sensing.is_active:
             if self.all_clear():
                 self.send("senseToMove")
-            if self.obstructed():
+            elif self.obstructed():
                 self.send("senseToSweep")
         elif self.sweeping.is_active:
             if self.all_clear():
@@ -321,8 +323,7 @@ Which course outcomes have you achieved so far, and which ones remain?
             if self.obstructed():
                 self.send("moveToIdle")
 
-    # These conditional callbacks are used as flags to allow the events to occur and move to the next state
-    # The update function at the bottom is to make sure that the distance being used is lways up to date with where the robot is.
+
     def all_clear(self):
         return self.currentDistance > self.threshold
     
