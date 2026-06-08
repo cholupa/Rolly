@@ -12,6 +12,7 @@ PORT = 5000
 BYTES = 1024
 packet = 0
 
+turtle.setup(width=800, height=800)
 
 def startServing():
     try:
@@ -29,7 +30,7 @@ def startServing():
                     if not data:
                         print("No Packet")
                         break
-                    packet = struct.unpack( 'f', data)[0]
+                    packet = struct.unpack( 'ii', data)[0:]
                     connection.sendall(b'Packet Received')
                     print(packet)
     finally:
@@ -42,6 +43,15 @@ server_thread.start()
 
 ttWindow = turtle.Screen()
 tt = turtle.Turtle()
+
+
+
+def draw(turtleObj, movement):
+
+    pass
+    
+
+
 
 turtle.mainloop()
 
