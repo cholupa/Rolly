@@ -57,6 +57,25 @@ if DEBUG:
 class MotorDriver:
     #TODO replace LEDS with actual motors --> UPDATE L293D chip burned out, replacements ordered
     # Setup motor pins, all wiring go to 3.3v side of BOB to save space on platform
+    #
+    # Motor driver
+    # TB6612FNG
+    #L-R
+    # VM-----PWMA-4
+    # VCC-----A1N2-17
+    # GND-----A1N1-27
+    # A01-----STBY-22
+    # A02-----B1N1-5
+    # B02-----B1N2-6
+    # B01-----PWMB-13
+    # GND-----GND
+    #
+    # 
+    #
+    #
+    #
+    #
+    #
 
     # Green light = LEFTW
     # Yellow light = RIGHTW

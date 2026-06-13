@@ -1,3 +1,6 @@
+# --CLIENT--
+# The purpose of the client file is to gather the distance data from the robot class and send to the server file on a local computer. 
+
 import socket
 import struct
 import threading
