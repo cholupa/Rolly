@@ -2,19 +2,17 @@
 # This file is for the actual control of the robot. The classes involved in this files handle all of the physical mechanics
 # and main logic causing the robot to move, relay display patterns for the leds, and gathers the sensor data.
 # 
-# There are 4 classes involved, 3 are components of the robot.
+# There are 4 classes involved, 3 are components of the robot, with the Rolly class being the container for the components
 # EchoDriver
 # MotorDriver
 # ServoDriver
 # Rolly
 #
-# Rolly is a composite of the driver classes to make the full FSM
 #
 #
 #
 #
 #
-#UPDATES: Button class removed, runs begin from computer through ssh connection, 
 #
 #####################
 
@@ -26,15 +24,11 @@ from time import sleep, time
 
 from statemachine import StateMachine, State
 
-import board
-import adafruit_ahtx0
-
-from gpiozero import PWMLED, Motor
+from gpiozero import PWMLED
 
 import lgpio
 
-
-from math import floor
+from math import floor, random
 
 
 
@@ -57,10 +51,9 @@ if DEBUG:
 class MotorDriver:
     #TODO replace LEDS with actual motors --> UPDATE L293D chip burned out, replacements ordered
     # Setup motor pins, all wiring go to 3.3v side of BOB to save space on platform
-    #
-    # Motor driver
+    
+
     # TB6612FNG
-    #L-R
     # VM-----PWMA-4
     # VCC-----A1N2-17
     # GND-----A1N1-27
@@ -69,29 +62,26 @@ class MotorDriver:
     # B02-----B1N2-6
     # B01-----PWMB-13
     # GND-----GND
-    #
-    # 
-    #
-    #
-    #
-    #
-    #
 
-    # Green light = LEFTW
-    # Yellow light = RIGHTW
-    LEFTW = 17
-    RIGHTW = 27
-#
-#    PWMEN1 =  17
-#    DIRFOR1 = 27
-#    DIRREV1 = 22
-#
-#    PWMEN2 = 21
-#    DIRFOR2 = 16
-#    DIRREV2 = 20
-    def __init__(self):
-        self.leftW = PWMLED(self.LEFTW)
-        self.rightW = PWMLED(self.RIGHTW)
+    PWMA = 4
+    A1N2 = 17
+    A1N1 = 27
+    STBY = 22
+    B1N1 = 5
+    B1N2 = 6
+    PWMB = 13
+
+    pins = [PWMA, A1N2, A1N1, STBY, B1N1, B1N2, PWMB]
+
+    # pins must be assigned and pwm objects to control the motors. 
+    def setUpPins(self):
+        for pin in pins:
+            GPIO.setup(pin, GPIO.OUT)
+            GPIO.output(pin, GPIO.LOW)
+        return GPIO.PWM(PWMA, 1000), GPIO.PWM(PWMB, 1000)
+
+
+
     # both drive wheels turn in forward direction
     def forward(self):
         self.leftW.pulse(1,1,None,True)
@@ -205,7 +195,9 @@ class Rolly(StateMachine):
     currentDistance = 0
     leftDistance = 0
     rightDistance = 0
-    direction = 0
+    turn = None
+    leftAble = False
+    rightAble = False
     threshold = 20.0
 
     currentAction = {}
@@ -238,25 +230,37 @@ class Rolly(StateMachine):
 
 
 
-    # instance all physical components within the rolly class
+    # instance all physical components
 
     echoSensor = EchoDriver()
     servo = ServoDriver()
     motors = MotorDriver()
 
-    # temperature sensor
-    currentT = 0
-    i2c = board.I2C()
-    thSensor = adafruit_ahtx0.AHTx0(i2c)
-
+    # TODO packAction => update turtle change direction to strings 
     def packAction(self):
         #self.currentAction['distance'] = self.currentDistance
-        if self.leftDistance > self.rightDistance:
-            self.direction = -90
-        elif self.leftDistance < self.rightDistance:
-            self.direction = 90
-        elif self.currentDistance > self.threshold:
+        # first get comparison for left and right to see if either is viable to turn towards
+        self.rightAble = self.rightDistance > self.threshold
+        self.leftAble = self.leftDistance > self.threshold
+        
+        if self.currentDistance > self.threshold:
             self.direction = 0
+            return self.direction, self.currentDistance
+        else:
+            if self.rightAble and !self.leftAble:
+                self.direction = 90
+                self.currentDistance = self.rightDistance
+            elif !self.rightAble and self.leftAble:
+                self.direction = -90
+                self.currentDistance = self.leftDistance
+            elif self.rightAble and self.leftAble:
+                # random between 0 and 1 for choice between left and right
+                pass
+            return self.direction, self.currentDistance
+
+
+            
+
         return self.direction, self.currentDistance
 
 
