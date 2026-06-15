@@ -2,56 +2,39 @@
 # This file is for the actual control of the robot. The classes involved in this files handle all of the physical mechanics
 # and main logic causing the robot to move, relay display patterns for the leds, and gathers the sensor data.
 # 
-# There are 4 classes involved, 3 are components of the robot, with the Rolly class being the container for the components
-# EchoDriver
-# MotorDriver
-# ServoDriver
-# Rolly
-#
-#
-#
-#
-#
-#
-#
+# There are 4 classes involved, 3 are components of the robot, with the Rolly class being the container for the components.
+# EchoDriver - echo sensor controller
+# MotorDriver - dc motors for wheel drives
+# ServoDriver - servo motor control to turn the sensor to a set direction
+# Rolly - manager of the Driver classes
 #####################
 
+# GPIO is the framework to allow use of the peripherals and the GPIO pins.
+# sleep is used for signal control to ensure no overlaps or faulty signals.
+# time used to record time frames with the echo.
+# state machine allows the creation of states and transitions. these states make sure the bot will not move to another event or action unless
+# state rules are satisfied.
+# random used for decision making in uncertain situations.
 
 import RPi.GPIO as GPIO
-
 
 from time import sleep, time
 
 from statemachine import StateMachine, State
 
-from gpiozero import PWMLED
+import random
 
-import lgpio
+# set the board mode before everything, otherwise will cause conflicts within the classes.
+GPIO.setmode(GPIO.BCM)
 
-from math import floor, random
-
-
-
-# Global Debug
-
-DEBUG = True
-
-if DEBUG:
-    print("Imports good")
-
-
-# set the board mode --> send to main.py
-#GPIO.setmode(GPIO.BOARD)
-
-# -MotorDriver class controls the DC motors for wheel movements using PWM
-# -The motor is controlled physically by using the L293D driver chip and powered by a separate power supply module 9V
-# -Only use 2 driver wheels for motion, 3 sets of wheels altogether. The drive wheels are positioned in the center of the bot for
-#  easier turning
+# MotorDriver class controls the DC motors for wheel movements using PWM.
+# the motor is controlled physically by using the L293D driver chip and powered by a separate power supply module 9V.
+# only use 2 driver wheels for motion, 3 sets of wheels altogether. The drive wheels are positioned in the center of the bot for
+# easier turning.
 
 class MotorDriver:
-    #TODO replace LEDS with actual motors --> UPDATE L293D chip burned out, replacements ordered
-    # Setup motor pins, all wiring go to 3.3v side of BOB to save space on platform
     
+    # Pin designations
 
     # TB6612FNG
     # VM-----PWMA-4
@@ -70,139 +53,213 @@ class MotorDriver:
     B1N1 = 5
     B1N2 = 6
     PWMB = 13
+    FREQ = 100
+    DUTY = 85
+
+    # use 2 hobby dc motors to drive the bot, each independent of each other, this way the bot can turn 360 degrees without moving forward.
+    # this class is only for motor movement with 4 basic function, forward, backward, left and right.
+
+    motorA = None
+    motorB = None
 
     pins = [PWMA, A1N2, A1N1, STBY, B1N1, B1N2, PWMB]
 
-    # pins must be assigned and pwm objects to control the motors. 
-    def setUpPins(self):
-        for pin in pins:
+   # the setup function determines pin type, motors are only output devices so all pins are set to output and PWM pins must be set to a frequency.
+    def setupPins(self):
+        for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, GPIO.LOW)
-        return GPIO.PWM(PWMA, 1000), GPIO.PWM(PWMB, 1000)
+        self.motorA = GPIO.PWM(self.PWMA, self.FREQ)
+        self.motorB = GPIO.PWM(self.PWMB, self.FREQ)
+        GPIO.output(self.STBY, GPIO.HIGH)
+        self.motorA.start(0)
+        self.motorB.start(0)
 
-
-
-    # both drive wheels turn in forward direction
+    # the movement functions set the motorspeed and direction.
+    # A and B pins are the direction inputs which for each direction are set to either HIGH or LOW.
+    # to get same direction set N# to same value for A and B.
+    # turns set the N# for A and B opposite
     def forward(self):
-        self.leftW.pulse(1,1,None,True)
-        self.rightW.pulse(1,1,None,True)
+        print("forward")
+        GPIO.output(self.A1N2, GPIO.LOW)
+        GPIO.output(self.B1N2, GPIO.LOW)
+        GPIO.output(self.A1N1, GPIO.HIGH)
+        GPIO.output(self.B1N1, GPIO.HIGH)
 
-    # both drive wheels turn in the backward direction
+        self.motorA.ChangeDutyCycle(self.DUTY)
+        self.motorB.ChangeDutyCycle(self.DUTY)
+
+
     def backward(self):
-        self.leftW.pulse(0.4, 0.4, None, True)
-        self.rightW.pulse(0.4, 0.4, None, True)
+        GPIO.output(self.A1N1, GPIO.LOW)
+        GPIO.output(self.B1N1, GPIO.LOW)
+
+        GPIO.output(self.A1N2, GPIO.HIGH)
+        GPIO.output(self.B1N2, GPIO.HIGH)
+
+        self.motorA.ChangeDutyCycle(self.DUTY)
+        self.motorB.ChangeDutyCycle(self.DUTY)
 
     def turnLeft(self):
-        self.leftW.pulse(1.0, 1.0, None, True)
-        self.rightW.off()
+        
+        GPIO.output(self.A1N2, GPIO.LOW)
+        GPIO.output(self.B1N2, GPIO.HIGH)
+        GPIO.output(self.B1N1, GPIO.LOW)
+        GPIO.output(self.A1N1, GPIO.HIGH)
+
+        self.motorA.ChangeDutyCycle(self.DUTY)
+        self.motorB.ChangeDutyCycle(self.DUTY)
+
+        sleep(2)
+
+        self.motorA.ChangeDutyCycle(0)
+        self.motorB.ChangeDutyCycle(0)
 
     def turnRight(self):
-        self.rightW.pulse(1.0, 1.0,None, True)
-        self.leftW.off()
+        GPIO.output(self.A1N2, GPIO.HIGH)
+        GPIO.output(self.B1N2, GPIO.LOW)
+        GPIO.output(self.B1N1, GPIO.HIGH)
+        GPIO.output(self.A1N1, GPIO.LOW)
+
+        self.motorA.ChangeDutyCycle(self.DUTY)
+        self.motorB.ChangeDutyCycle(self.DUTY)
+
+        sleep(2)
+
+        self.motorA.ChangeDutyCycle(0)
+        self.motorB.ChangeDutyCycle(0)
+
 
     def stop(self):
-        self.leftW.off()
-        self.rightW.off()
+        self.motorA.ChangeDutyCycle(0)
+        self.motorB.ChangeDutyCycle(0)
 
 
-# The ServoDriver controls the SG90 micro servo motor. The servo will control the angle the echo sensor is facing. A single servo is used for turning
+
+# The ServoDriver controls the SG90 micro servo motor.
+# The servo turns in 90 degree increments, making the sensor face eithe straight forward, directly left or directly right
 # the sensor left and right +- 90 degrees in both directions with 0 facing forward.
 
 class ServoDriver:
 
-#    use Rpi.GPIO
 
-    # Maintain a clamp within the bounds of the motor pulse capabilities
-    MAXP = 2000
-    CENTERP = 1500
-    MINPW = 1000
-    currentDC = 0
-
-    MINDC = 2
+    # Maintain within the bounds duty cycle capabilities
     MAXDC = 12
-
+    CENTERD = 7
+    MINDC = 2
+    FREQ = 50
     pin = 25
-    GPIO.setup(pin, GPIO.OUT)
-    servo = GPIO.PWM(pin, 50)
-    servo.start(0)
-    sleep(2)
+    servo = None
 
-    #h = lgpio.gpiochip_open(0)
-    #currentPulseW = 1500
+    def setupPins(self):
+        GPIO.setup(self.pin, GPIO.OUT)
+        self.servo = GPIO.PWM(self.pin, self.FREQ)
+        self.servo.start(0)
 
-    def setPulse(self):
-        #lgpio.tx_pwm(self.h, self.pin, 50, 10,pulse_offset=0, pulse_cycles=0)
-        self.servo.ChangeDutyCycle(self.currentDC)
-
-
+    # sets sensor to specified position
     def sweep(self,target):
         self.servo.ChangeDutyCycle(target)
-        sleep(1)
+        sleep(0.2)
         self.servo.ChangeDutyCycle(0)
+    
+    # set the sensor straight ahead
+    def centerServo(self):
+        self.sweep(self.CENTERD)
+        sleep(0.2)
+    # set sensor 90 to the left
+    def turnLeft(self):
+        self.sweep(self.MAXDC)
+        sleep(0.2)
+    # set sensor 90 to the right
+    def turnRight(self):
+        self.sweep(self.MINDC)
+        sleep(0.2)
 
 
-    def centerServo(self,duty=7):
-        self.sweep(duty)
-        sleep(2)
-
-    def turnLeft(self,duty=12):
-        self.sweep(duty)
-        sleep(2)
-
-    def turnRight(self, duty=2):
-        self.sweep(duty)
-        sleep(2)
-
-
-
-
+# the echo driver is only to record the distance from the sensor and return the distance to the bot for decision making
+# distance is recorded in centimeters
 class EchoDriver:
 
     # setup pins
     TRIG = 23
     ECHO = 24
-    GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
+    TIMEOUTDISTANCE = 200
+
+    #v = 82 cm/s
+
+    def setupPins(self):
+        GPIO.setup(self.TRIG, GPIO.OUT)
+        GPIO.setup(self.ECHO, GPIO.IN)
 
     # pulse the trigger and receive through echo returns the calc distance
+    # pulse width is 10 microseconds per device specs
+    # the timeout is a value used to check if the sensor is waiting on an endless echo or none at all
     def pulse(self):
         GPIO.output(self.TRIG, False)
-        # send the trigger pulse for 10 microseconds
         GPIO.output(self.TRIG, True)
         sleep(0.0001)
         GPIO.output(self.TRIG, False)
 
+        # check for sensor fault 
+        timeout = time() + 0.04 
+        startTime = time()
+        endTime = time()
+
         while GPIO.input(self.ECHO) == 0:
             startTime = time()
+            # waiting for echo to go HIGH, if not, the trigger did not send properly
+            if time() > timeout:
+                return self.TIMEOUTDISTANCE + 1
 
         while GPIO.input(self.ECHO) == 1:
             endTime = time()
+            # waiting for a reset, if signal stays high then either blocked or signal is stuck
+            if time() > timeout:
+                return 0
 
-        sleep(1)
-        elapsedTime = endTime -startTime
-        distance = (elapsedTime * 34300) / 2
-
-        return distance
+        elapsedTime = endTime - startTime
+        return (elapsedTime * 34300) / 2
 
 
 # The Rolly class is the controller for all physical components
-# controls the statemachine mechanics
-
 
 class Rolly(StateMachine):
-
     
     currentDistance = 0
     leftDistance = 0
     rightDistance = 0
     turn = None
+    # Able vairables are to tell if a direction is valid or not
     leftAble = False
     rightAble = False
+    # the minimum distance that the robot can travel until it is officially obstructed
     threshold = 20.0
+    direction = 0
+    # check to see if the step is finished in order to send the path data
+    stepReady = False
+    LEDFREQ = 80
+    # LED pins that pulse for each general function, a base light for program running, moving for when the robot moves, and when there is a write to the database
+    BASE = 12
+    MOVE = 16
+    WRITE = 21
 
-    currentAction = {}
+    def __init__(self):
+        self.echoSensor = EchoDriver()
+        self.servo = ServoDriver()
+        self.motors = MotorDriver()
+
+        GPIO.setup(self.BASE, GPIO.OUT)
+        GPIO.setup(self.MOVE, GPIO.OUT)
+        GPIO.setup(self.WRITE, GPIO.OUT)
+
+        self.setupAll()
+
+        super().__init__()
+    
 
     # States of the machine
+    # 5 different states that are transitioned to by defined events below.
+    # the robot can only be in one state at a time and must transition via event calls
     idle = State(initial=True) # a default state for the bot to begin in
     sensing = State() # the distance sensing directly in front
     sweeping = State() # read distances from left and right sides to determine open area
@@ -218,28 +275,22 @@ class Rolly(StateMachine):
     turnToMove = turning.to(moving, cond="all_clear")
     moveToIdle = moving.to(idle, cond="obstructed")
 
+    def setupAll(self):
+        self.baseLED = GPIO.PWM(self.BASE, self.LEDFREQ)
+        self.movementLED = GPIO.PWM(self.MOVE, self.LEDFREQ)
+        self.dbWriteLED = GPIO.PWM(self.WRITE, self.LEDFREQ)
+        self.baseLED.start(0)
+        self.movementLED.start(0)
+        self.dbWriteLED.start(0)
+        self.echoSensor.setupPins()
+        self.servo.setupPins()
+        self.motors.setupPins()
+    # TODO add in all device and peripheral checks to make sure ALL are functional
+    def test(self):
+        testDistance = self.echoSensor.pulse()
 
-
-    # LED displays for different states
-
-    baseLED = PWMLED(26)
-    movementLED = PWMLED(13)
-    dbWriteLED = PWMLED(19)
-
-
-
-
-
-    # instance all physical components
-
-    echoSensor = EchoDriver()
-    servo = ServoDriver()
-    motors = MotorDriver()
-
-    # TODO packAction => update turtle change direction to strings 
+    # takes the sensor data for distance around it and decides which direction to take. if multiple options are available, then a random choice will be decided on
     def packAction(self):
-        #self.currentAction['distance'] = self.currentDistance
-        # first get comparison for left and right to see if either is viable to turn towards
         self.rightAble = self.rightDistance > self.threshold
         self.leftAble = self.leftDistance > self.threshold
         
@@ -247,23 +298,24 @@ class Rolly(StateMachine):
             self.direction = 0
             return self.direction, self.currentDistance
         else:
-            if self.rightAble and !self.leftAble:
+            if self.rightAble and not self.leftAble:
                 self.direction = 90
                 self.currentDistance = self.rightDistance
-            elif !self.rightAble and self.leftAble:
+            elif not self.rightAble and self.leftAble:
                 self.direction = -90
                 self.currentDistance = self.leftDistance
             elif self.rightAble and self.leftAble:
-                # random between 0 and 1 for choice between left and right
-                pass
-            return self.direction, self.currentDistance
-
-
-            
+                if random.randint(0,1):
+                    self.direction = 90
+                    self.currentDistance = self.rightDistance
+                else:
+                    self.direction = -90
+                    self.currentDistance = self.leftDistance
+            else:
+                return None, None
 
         return self.direction, self.currentDistance
-
-
+            
 
     # transition functions between states
     # This is where the physical components are to make their changes. These functions are automatically found and ran when the state cycles from one to the next.
@@ -272,24 +324,24 @@ class Rolly(StateMachine):
     def on_enter_idle(self):
         if DEBUG:
             print("Entering Idle")
-        self.baseLED.on()
+        self.baseLED.ChangeDutyCycle(60)
 
     def on_exit_idle(self):
         if DEBUG:
             print("Exiting Idle")
-        self.baseLED.off()
+        self.baseLED.ChangeDutyCycle(0)
 
     def on_enter_sensing(self):        
-        self.baseLED.pulse(1, 1, None, True)
+        self.baseLED.ChangeDutyCycle(5)
         self.servo.centerServo()
         self.currentDistance = self.echoSensor.pulse()
 
     def on_exit_sensing(self):
         if DEBUG:
             print("Exit Sensing")
-        self.baseLED.off()
+        self.baseLED.ChangeDutyCycle(0)
     def on_enter_sweeping(self):
-        self.baseLED.pulse(0.1,0.1,None,True)
+        self.baseLED.ChangeDutyCycle(20)
         self.servo.turnLeft()
         self.leftDistance = self.echoSensor.pulse()
 
@@ -299,34 +351,44 @@ class Rolly(StateMachine):
         self.servo.centerServo()
 
     def on_exit_sweeping(self):
-        self.baseLED.off()
+        self.baseLED.ChangeDutyCycle(0)
+
+    # when entering a move, continue moving forward until an obstruction is found
     def on_enter_moving(self):
         if DEBUG:
             print("Entering moving Forward")
-        self.movementLED.pulse(1, 1, None, True)
+        self.movementLED.ChangeDutyCycle(40)
         self.motors.forward()
+        while True:
+            self.currentDistance = self.echoSensor.pulse()
+            if self.obstructed():
+                self.motors.stop()
+                break
+
+    # if the move is finished then the step is finished
     def on_exit_moving(self):
         if DEBUG:
-            print("Exiting Moving Forward")
-        self.movementLED.off()
-        self.motors.stop()
+            print("STOPPING")
+        self.movementLED.ChangeDutyCycle(0)
+        self.stepReady = True
+    
     def on_enter_turning(self):
         if DEBUG:
             print("Entering a turn")
-        self.movementLED.pulse(0.5,0.5,None,True)
+        self.movementLED.ChangeDutyCycle(30)
         if self.leftDistance > self.rightDistance:
             self.motors.turnLeft()
         else:
             self.motors.turnRight()
-        # depending on direction taken eith turn left or turn right
+    
     def on_exit_turning(self):
         if DEBUG:
             print("Exiting a turn")
-        self.movementLED.off()
+        self.movementLED.ChangeDutyCycle(0)
         self.motors.stop()
     
+    # a run is defined by the events the robot goes through and when a condition is met will send the robot to the next state
     def run(self):
-        self.update()
         if self.idle.is_active:
             self.send("startSensing")
         elif self.sensing.is_active:
@@ -353,6 +415,3 @@ class Rolly(StateMachine):
     def obstructed(self):
         return self.currentDistance < self.threshold
 
-    def update(self):
-        if self.moving.is_active:
-            self.currentDistance = self.echoSensor.pulse()
