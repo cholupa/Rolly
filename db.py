@@ -3,13 +3,12 @@ import redis
 # the database class using Redis
 # Redis is a lightwieght database framework primarly holding data as key:value pairs in memory rather than disk
 # disk writing is available if you want to provided using the appendonlyfile .aof
-# memory file listed as the dum.rdp
+# memory file listed as the dump.rdp
 # this uses static only methods to maintain a single connection at a time and there doesn't need to be more than one instance of the class during operation
-# thje class will utilize basic CRUD operations and the primary objects to hold will be pathing data and Pi status via timestamps
+# the class will utilize basic CRUD operations and the primary objects to hold will be the robot pathing data
 
 class database:
 
-    writable = False
     
     @staticmethod
     def startCon():
@@ -42,7 +41,7 @@ class database:
             return con.hget(f'P{pathNum}:S{stepNum}')
         else:
             keys = con.smembers('INDEX')
-            fullPath = [k for k in keys if k.startswith(f'P{pathNum}:'}]
+            fullPath = [k for k in keys if k.startswith(f'P{pathNum}:')]
             return {key: con.hgetall(key) for key in sorted(fullPath)}
     
     # delete a key from the db, two deletes must hapopen since the data and key are stored differently
