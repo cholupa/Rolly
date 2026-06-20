@@ -10,13 +10,13 @@ Rolly
 
 
 ## ALGORITHMS & DATASTRUCTURES
-
+[Go to Algorithms & Datastructures](ALGORITHM.md)
 ### Original
 
 ### Enhancement
 
 ## DATABASE
-
+[Go to Database](DATABASE.md)
 ### Original
 < 
 ### Enhancement
