@@ -15,5 +15,18 @@ Rolly
 
 ### Original
 [The Thermostat Project](https://github.com/cholupa/Rolly/edit/cholupa-NarrativeDocs/Thermostat.py)
-### Enhancements
-[]()
+### Enhancement
+[The Rolly Bot](https://github.com/cholupa/Rolly/edit/cholupa-NarrativeDocs/rolly.py)
+
+
+## ALGORITHMS & DATASTRUCTURES
+
+### Original
+
+### Enhancement
+
+## DATABASE
+
+### Original
+< 
+### Enhancement
