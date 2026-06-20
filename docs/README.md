@@ -6,7 +6,7 @@ Rolly
 
 ### ENGINEERING & DESIGN
 
-[Go to Engineering & Design Page](https://github.com/cholupa/Rolly/edit/cholupa-NarrativeDocs/docs/DESIGN.md)
+[Go to Engineering & Design Page](DESIGN.md)
 
 
 ## ALGORITHMS & DATASTRUCTURES
