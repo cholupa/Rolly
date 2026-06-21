@@ -3,11 +3,11 @@ layout: page
 title: Design Enhancement
 ---
 
-# Overview
+# Design & Engineering
 
 ## Original Artifact - CS350:Thermostat.py
 
-![Thermostat](images/ThermostatOriginal.jpg)
+![Thermostat](images/[ThermostatOriginal.jpg](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/ThermostatOriginal.jpg))
 
 > The thermostat build above
 
