@@ -1,4 +1,3 @@
-# ROLLY
 
 ## The Assessment
 
