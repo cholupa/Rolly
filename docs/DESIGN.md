@@ -3,11 +3,11 @@ layout: page
 title: Design Enhancement
 ---
 
-#Overview
+# Overview
 
-## Original Artifact
+## Original Artifact - CS350:Thermostat.py
 
-The original artifact acting as the basis for this section was the Thermostat,py file from Emerging Systems, Architectures, and Technologies course. The project was a slow build up throughout the course, starting with a simple LED circuit to a functional thermostat program. This was created recently this year in April 2026 in the previous term. The project utilized different libraries for software and hardware communications including I2C, PWM, and basic hardware interrupts via buttons. 
+The original artifact acting as the basis for this section was the Thermostat.py file from Emerging Systems, Architectures, and Technologies course. The project was a slow build up throughout the course, starting with a simple LED circuit to a functional thermostat program. This was created recently this year in April 2026 in the previous term. The project utilized different libraries for software and hardware communications including I2C, PWM, and basic hardware interrupts via buttons. 
 
 > States of the machine
 
@@ -26,9 +26,21 @@ class TemperatureMachine(StateMachine):
     heat = State()
     cool = State()
 ```
-## Reasoning
+## Enhancement
 
-This artifact was included because the thermostat file contained most of the structure for my project. For an embedded system, unless the system itself is overly complex, the actual file structure can be dialed down to a few files. This is especially so for microcontrollers or microcomputers that do not have much on board memory to use. The libraries used in the thermostat are also in the current project, mainly those dealing with hardware control. In the case of enhancement, as stated in earlier modules this is more of a lateral change than a cut and dry enhancement. The project now employs multiple sensors and  2 types of motors, DC mini motors and SG90 servo motors. So in a way the enhancement is the addition of new peripheral devices to the project. The thermostat is still in use, but only for receiving sensor data. This data will be used in conjunction with the HC-SR04 echo sensor to obtain a more accurate value for distance measurements. The main other enhancement is the addition of 2 files, the rolly.py file to hold the actual robot characteristics and a db.py file for the database interactions.
+This artifact was included because the thermostat file contained most of the structure for my project. For an embedded system, unless the system itself is overly complex, the actual file structure can be dialed down to a few files. This is especially so for microcontrollers or microcomputers that do not have much on board memory to use. The libraries used have been condensed to serve 4 main functions.
+> rolly.py Imports [rolly file](https://github.com/cholupa/Rolly/blob/main/rolly.py)
+```
+import RPi.GPIO as GPIO
+
+from time import sleep, time
+
+from statemachine import StateMachine, State
+
+import random
+
+```
+RPi.GPIO handles all of the peripheral communications, time to control buffers for peripheral activation and deactivation, statemachine to hold the makeup of the machine states, and random for decision. The project now employs an echo sensor and  2 types of motors, DC mini motors and a SG90 servo motor. The echo sensor is attached to the servo in order to get distance readings in 3 directions, left right, and center. Other enhancements include the addition of 4 files, the rolly.py file to hold the actual robot characteristics, a db.py file for the database functions, and client & server files to relay data to another device/computer.
 
 ## Outcome
 I believe I have met the outcome of using innovative techniques and most certainly tools for a meaningful purpose. I have updated the code to manage the sensors and motors separately which will help in the upcoming algorithmic side of the project. Enclosing the motors and sensors in classes is usually not necessary in an embedded system that has small memory, but by using a microcomputer instead of a microcontroller, I can safely have a few classes without worrying about memory usage. I also encountered trade-offs in the design, both physical and software related that I believe have resulted in the best course of the project. Because this will be a portable device, the activation of the scripts can be done one of 2 ways. The main loop will be able to be run off of boot, or whilst plugged in through the ssh terminal. Using ssh to activate can give live monitoring to the device, where a run from boot can be a primary function when the project is fully functional.
