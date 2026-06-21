@@ -133,8 +133,7 @@ class Rolly(StateMachine):
 
 I believe I have met the outcome of using innovative techniques and most certainly tools for a meaningful purpose. I have updated the code to manage the sensors and motors separately, maintaining a separation of concerns. Enclosing the motors and sensors in classes is usually not necessary in an embedded system that has small memory, but by using a microcomputer instead of a microcontroller, memory capacity is not an issue, with the Rpi4 B containing 4GB of RAM.
 
->total        used        free      shared  buff/cache   available
->Mem:           3.7Gi       314Mi       3.1Gi       3.2Mi       435Mi       3.4Gi
+>Mem: 3.7Gi       used: 314Mi       free: 3.1Gi       shared: 3.2Mi       buff/cache: 435Mi       available: 3.4Gi
 
 
 There were tradeoffs in the design such as what peripherals to include compared to space available. There are no hardware interrupts and instead interrupts are managed by the RPi.GPIO library and the OS. Hardware interrupts are preferred over software because of possible timing conflicts in peripheral signaling. 
