@@ -4,7 +4,7 @@
 
   The algorithms used created in this enhancement are primarily for the motion of the robot. The original artifact was a part of the Thermostat.py file, the state machine. A finite state machine was developed for this project to control what actions the robot is supposed to take dependent on its current location in respect to open spaces.
 
-> The temperature state machine
+> Thermostat lighting update
 
 ```python
    def updateLights(self):
