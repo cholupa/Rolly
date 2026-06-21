@@ -7,7 +7,7 @@ title: Design Enhancement
 
 ## Original Artifact - CS350:Thermostat.py
 
-![Thermostat](images/[ThermostatOriginal.jpg](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/ThermostatOriginal.jpg))
+![Thermostat](https://github.com/cholupa/Rolly/blob/main/images/ThermostatOriginal.jpg)
 
 > The thermostat build above
 
