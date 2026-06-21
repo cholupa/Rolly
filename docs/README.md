@@ -36,7 +36,7 @@ Rolly
 ```
   Scripting is involved in almost all aspects of Computer Science and through this program I have learned many languages and the syntaxes that go along with them. Some are better than others, but all follow a baseline flow. Understanding this notion is what makes leaning into new technologies and frameworks easier to get used to. This means that I can learn any framework, given time to read up on it. That is one aspect that the program has taught me.
 
-  ## Programming Topics
+## Programming Topics
 
 *Collaboration with a team*
 
