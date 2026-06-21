@@ -127,5 +127,11 @@ class Rolly(StateMachine):
 
 ## Outcome of the enhancement
 
-I believe I have met the outcome of using innovative techniques and most certainly tools for a meaningful purpose. I have updated the code to manage the sensors and motors separately, maintaining a separation of concerns. Enclosing the motors and sensors in classes is usually not necessary in an embedded system that has small memory, but by using a microcomputer instead of a microcontroller, memory capacity is not an issue, with the Rpi4 B containing 2GB of RAM. There were tradeoffs in the design such as what peripherals to include compared to space available. There are no hardware interrupts and instead interrupts are managed by the RPi.GPIO library and the OS. Hardware interrupts are preferred over software because of possible timing conflicts in peripheral signaling. 
+I believe I have met the outcome of using innovative techniques and most certainly tools for a meaningful purpose. I have updated the code to manage the sensors and motors separately, maintaining a separation of concerns. Enclosing the motors and sensors in classes is usually not necessary in an embedded system that has small memory, but by using a microcomputer instead of a microcontroller, memory capacity is not an issue, with the Rpi4 B containing 4GB of RAM.
+
+>total        used        free      shared  buff/cache   available
+>Mem:           3.7Gi       314Mi       3.1Gi       3.2Mi       435Mi       3.4Gi
+
+
+There were tradeoffs in the design such as what peripherals to include compared to space available. There are no hardware interrupts and instead interrupts are managed by the RPi.GPIO library and the OS. Hardware interrupts are preferred over software because of possible timing conflicts in peripheral signaling. 
 At the beginning of refactoring the code and files, I aimed to use uv astral to help structure the project, which uv did create a clean space to work off of, but I encountered an issue with using it in this system. Some of the packages used require root access to use the hardware (GPIO) pins. UV creates an enclosed environment that prevents the ability to run as root. This is a safety guard and if allowed to reach root, there are conflicts within the core functions that will break the code. In the end I abandoned the use of a packaging system. In a trade-off for neat organization, I employ direct control by running as root to access the packages saved in the system. Once again, as this is a small device, it is not abnormal to structure a project in this fashion. 
