@@ -1,8 +1,8 @@
-Rolly
+# ROLLY
 
-# The Assessment
+## The Assessment
 
-## Learned Skills
+### Learned Skills
 
   The coursework I have completed throughout this program has given me a good foundation in a few areas of Computer Sciences. First and foremost is organization and planning. This is a skill that is paramount to good and clean programming. Organization deals with your project structure like a typical layout of your files. What sticks out more to me is what the project really needs to contain in order to be functional.
 
@@ -36,7 +36,7 @@ Rolly
 ```
   Scripting is involved in almost all aspects of Computer Science and through this program I have learned many languages and the syntaxes that go along with them. Some are better than others, but all follow a baseline flow. Understanding this notion is what makes leaning into new technologies and frameworks easier to get used to. This means that I can learn any framework, given time to read up on it. That is one aspect that the program has taught me.
 
-## Programming Topics
+### Programming Topics
 
 *Collaboration with a team*
 
@@ -59,25 +59,20 @@ Security often isn’t the first thing you think about in development but it sho
 Software engineering is one of the main facets of Computer Science and was implemented throughout the coursework. One of the first things we learned about is the software development life cycle, where you plan, design, build, test, and maintain. This cycle is neverending and will always need improvements, and is no exception to my coursework. The cycle encompasses all of the other topics previously discussed. The following sections will introduce and show how these understanding turned a Raspberry Pi into a functioning robot.
 
 
-# Introdution to Rolly
+## Introdution to Rolly
 
 The primary artifact referenced throughout this project is a thermostat state machine that reads a temperature from an attached sensor. This was a project from the course CS350: *Emerging Systems, Architectures & Technologies*. Button inputs set a target temperature and change the state to cool, heat or off and manipulate LEDs as an output for a user to tell what is currently happening within the state. This was written in Python and is the basis for the design and data structure categories of the enhancements. The database category did not have any previous artifact and was built from the ground up. Instead of working on separate projects to complete the enhancements, they are combined into a singular project that satisfies all categories. This is the Rolly project. Rolly is an autonomous robot that moves in a direction, senses obstructions, and moves to a new valid direction. The thermostat artifact acts as the foundation for the hardware and structure, and the database layer records the robot actions.
 
 ## **ARTIFACTS**
 
-### ENGINEERING & DESIGN
+#### ENGINEERING & DESIGN
 
 [Go to Engineering & Design Page](DESIGN.md)
 
 
-## ALGORITHMS & DATASTRUCTURES
+#### ALGORITHMS & DATASTRUCTURES
 [Go to Algorithms & Datastructures](ALGORITHM.md)
-### Original
 
-### Enhancement
-
-## DATABASE
+#### DATABASE
 [Go to Database](DATABASE.md)
-### Original
 
-### Enhancement
