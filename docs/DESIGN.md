@@ -7,6 +7,10 @@ title: Design Enhancement
 
 ## Original Artifact - CS350:Thermostat.py
 
+![Thermostat](https://github.com/cholupa/Rolly/tree/cholupa-NarrativeDocs/images)
+
+> The thermostat build above
+
 The original artifact acting as the basis for this section was the Thermostat.py file from Emerging Systems, Architectures, and Technologies course. The project was a slow build up throughout the course, starting with a simple LED circuit to a functional thermostat program. This was created recently this year in April 2026 in the previous term. The project utilized different libraries for software and hardware communications including I2C, PWM, and basic hardware interrupts via buttons. 
 
 > States of the machine
