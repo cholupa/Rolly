@@ -24,7 +24,7 @@ title: Database Enhancement
         return con.hgetall(key)
 ```
 
-![A path drawn on Turtle using received values])(https://github.com/cholupa/Rolly/blob/main/db.py)
+As seen above the main structure is a dictionary, with parameters path and step numbers acting as the keys. For every step the next point in the path is created. 
 
 ## Outcome
 
