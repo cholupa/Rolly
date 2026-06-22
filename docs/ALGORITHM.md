@@ -1,3 +1,7 @@
+---
+layout: page
+title: Algorithm Enhancement
+---
 # Algorithms & Data Structure
 
 ## Original Artifact - CS350:Thermostat.py
