@@ -74,5 +74,5 @@ The primary artifact referenced throughout this project is a thermostat state ma
 [Go to Algorithms & Datastructures](ALGORITHM.md)
 
 #### DATABASE
-[Go to Database](DATABASE.md)
+[Go to Database](DATABASES.md)
 
