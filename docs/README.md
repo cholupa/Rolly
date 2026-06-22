@@ -89,6 +89,7 @@ The primary artifact referenced throughout this project is a thermostat state ma
 
 This program has taught me a lot in the concepts of what it means to be a computer scientist. One lesson is that you can't know everything. Understanding the key fundamentals in data structures, life cycle and flow, and security are the main concepts to become strong in first and the rest of the frameworks and software tools come later. I am always eager to learn more and hope to continue this as a profession in the near future.
 
-DH
+Derek Hui
+
 
 
