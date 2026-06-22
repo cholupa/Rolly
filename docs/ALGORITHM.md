@@ -87,7 +87,7 @@ The other side of this enhancement was how to display the information from the r
         return con.hgetall(key)
 
 ```
-![A simple path](https://github.com/cholupa/Rolly/blob/main/docs/images/Path1.png)
+![A simple path](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/Path1.png)
 
 > A simple path draw from the server file
 
