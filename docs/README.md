@@ -62,7 +62,8 @@ Software engineering is one of the main facets of Computer Science and was imple
 
 
 ## Introdution to Rolly
-![]()
+
+![The Final Product](https://github.com/cholupa/Rolly/blob/main/docs/images/RollyFinal.jpg)
 
 The primary artifact referenced throughout this project is a thermostat state machine that reads a temperature from an attached sensor. This was a project from the course CS350: *Emerging Systems, Architectures & Technologies*. Button inputs set a target temperature and change the state to cool, heat or off and manipulate LEDs as an output for a user to tell what is currently happening within the state. This was written in Python and is the basis for the design and data structure categories of the enhancements. The database category did not have any previous artifact and was built from the ground up. Instead of working on separate projects to complete the enhancements, they are combined into a singular project that satisfies all categories. This is the Rolly project. Rolly is an autonomous robot that moves in a direction, senses obstructions, and moves to a new valid direction. The thermostat artifact acts as the foundation for the hardware and structure, and the database layer records the robot actions.
 
