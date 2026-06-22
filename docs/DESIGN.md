@@ -31,6 +31,14 @@ class TemperatureMachine(StateMachine):
     cool = State()
 ```
 ## Enhancement
+[A first time soldering](https://github.com/cholupa/Rolly/blob/main/docs/images/solder1.jpg)
+
+> A necessity to solder after a chip burn out, my first time.
+
+[Attempt # 2](https://github.com/cholupa/Rolly/blob/main/docs/images/solder2.jpg)
+
+> The second round came out a little bit better.
+
 
 This artifact was included because the thermostat file contained most of the structure for my project. For an embedded system, unless the system itself is overly complex, the actual file structure can be dialed down to a few files. This is especially so for microcontrollers or microcomputers that do not have much on board memory to use. The libraries used have been condensed to serve 4 main functions.
 
