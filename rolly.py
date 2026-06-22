@@ -26,7 +26,7 @@ import random
 
 # set the board mode before everything, otherwise will cause conflicts within the classes.
 GPIO.setmode(GPIO.BCM)
-
+DEBUG = False
 # MotorDriver class controls the DC motors for wheel movements using PWM.
 # the motor is controlled physically by using the L293D driver chip and powered by a separate power supply module 9V.
 # only use 2 driver wheels for motion, 3 sets of wheels altogether. The drive wheels are positioned in the center of the bot for
@@ -185,8 +185,6 @@ class EchoDriver:
     ECHO = 24
     TIMEOUTDISTANCE = 200
 
-    #v = 82 cm/s
-
     def setupPins(self):
         GPIO.setup(self.TRIG, GPIO.OUT)
         GPIO.setup(self.ECHO, GPIO.IN)
@@ -226,6 +224,8 @@ class EchoDriver:
 class Rolly(StateMachine):
     
     currentDistance = 0
+    travelDistance = 0
+    STEPDISTANCE = 40
     leftDistance = 0
     rightDistance = 0
     turn = None
@@ -273,7 +273,8 @@ class Rolly(StateMachine):
     moveToSweep = moving.to(sweeping, cond="obstructed")
     sweepToTurn = sweeping.to(turning, cond="all_clear")
     turnToMove = turning.to(moving, cond="all_clear")
-    moveToIdle = moving.to(idle, cond="obstructed")
+    moveToIdle = moving.to(idle)
+    sweepToIdle = sweeping.to(idle)
 
     def setupAll(self):
         self.baseLED = GPIO.PWM(self.BASE, self.LEDFREQ)
@@ -285,7 +286,6 @@ class Rolly(StateMachine):
         self.echoSensor.setupPins()
         self.servo.setupPins()
         self.motors.setupPins()
-    # TODO add in all device and peripheral checks to make sure ALL are functional
     def test(self):
         testDistance = self.echoSensor.pulse()
 
@@ -294,9 +294,12 @@ class Rolly(StateMachine):
         self.rightAble = self.rightDistance > self.threshold
         self.leftAble = self.leftDistance > self.threshold
         
-        if self.currentDistance > self.threshold:
+        if self.travelDistance > self.threshold:
             self.direction = 0
-            return self.direction, self.currentDistance
+            print("FORWARD")
+            result = self.direction, self.travelDistance
+            self.travelDistance = 0
+            return result
         else:
             if self.rightAble and not self.leftAble:
                 self.direction = 90
@@ -312,9 +315,11 @@ class Rolly(StateMachine):
                     self.direction = -90
                     self.currentDistance = self.leftDistance
             else:
+                print("ALLNONE")
                 return None, None
+        print("action packed")
 
-        return self.direction, self.currentDistance
+        return self.direction, self.travelDistance
             
 
     # transition functions between states
@@ -344,37 +349,47 @@ class Rolly(StateMachine):
         self.baseLED.ChangeDutyCycle(20)
         self.servo.turnLeft()
         self.leftDistance = self.echoSensor.pulse()
-
+        sleep(0.5)
         self.servo.turnRight()
         self.rightDistance = self.echoSensor.pulse()
+        sleep(0.5)
         self.currentDistance = max(self.rightDistance, self.leftDistance)
         self.servo.centerServo()
+        sleep(0.5)
 
     def on_exit_sweeping(self):
         self.baseLED.ChangeDutyCycle(0)
 
     # when entering a move, continue moving forward until an obstruction is found
     def on_enter_moving(self):
-        if DEBUG:
-            print("Entering moving Forward")
+        lastValidDistance = 0
+        print("Entering moving Forward")
         self.movementLED.ChangeDutyCycle(40)
         self.motors.forward()
+        sleep(1)
         while True:
             self.currentDistance = self.echoSensor.pulse()
+            sleep(0.2)
+            if self.currentDistance >= self.echoSensor.TIMEOUTDISTANCE:
+                self.motors.stop()
+                break
             if self.obstructed():
                 self.motors.stop()
                 break
+            elif not self.obstructed():
+                lastValidDistance = self.currentDistance
+                if lastValidDistance > self.STEPDISTANCE:
+                    self.travelDistance = lastValidDistance
+                    self.stepReady = True
+                print(f"reading distance: {lastValidDistance}")
 
     # if the move is finished then the step is finished
     def on_exit_moving(self):
-        if DEBUG:
-            print("STOPPING")
+        print("STOPPING")
         self.movementLED.ChangeDutyCycle(0)
-        self.stepReady = True
     
     def on_enter_turning(self):
-        if DEBUG:
-            print("Entering a turn")
+        print("Entering a turn")
         self.movementLED.ChangeDutyCycle(30)
         if self.leftDistance > self.rightDistance:
             self.motors.turnLeft()
@@ -382,31 +397,39 @@ class Rolly(StateMachine):
             self.motors.turnRight()
     
     def on_exit_turning(self):
-        if DEBUG:
-            print("Exiting a turn")
+        print("Exiting a turn")
         self.movementLED.ChangeDutyCycle(0)
         self.motors.stop()
     
     # a run is defined by the events the robot goes through and when a condition is met will send the robot to the next state
     def run(self):
+        print(f"{self.current_state_value}")
         if self.idle.is_active:
             self.send("startSensing")
+            sleep(0.5)
         elif self.sensing.is_active:
             if self.all_clear():
                 self.send("senseToMove")
+                sleep(0.5)
             elif self.obstructed():
                 self.send("senseToSweep")
+                sleep(0.5)
         elif self.sweeping.is_active:
             if self.all_clear():
                 self.send("sweepToTurn")
+                sleep(0.5)
             else:
                 print("blocked")
+                self.send("sweepToIdle")
+                sleep(0.5)
         elif self.turning.is_active:
             if self.all_clear():
                 self.send("turnToMove")
+                sleep(0.5)
         elif self.moving.is_active:
             if self.obstructed():
                 self.send("moveToIdle")
+                sleep(0.5)
 
 
     def all_clear(self):
