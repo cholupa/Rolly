@@ -118,7 +118,7 @@ class Rolly(StateMachine):
     leftDistance = 0
     rightDistance = 0
     turn = None
-    # Able vairables are to tell if a direction is valid or not
+    # Able variables are to tell if a direction is valid or not
     leftAble = False
     rightAble = False
     # the minimum distance that the robot can travel until it is officially obstructed
@@ -145,4 +145,5 @@ I believe I have met the outcome of using innovative techniques and most certain
 
 
 There were tradeoffs in the design such as what peripherals to include compared to space available. There are no hardware interrupts and instead interrupts are managed by the RPi.GPIO library and the OS. Hardware interrupts are preferred over software because of possible timing conflicts in peripheral signaling. 
-At the beginning of refactoring the code and files, I aimed to use uv astral to help structure the project, which uv did create a clean space to work off of, but I encountered an issue with using it in this system. Some of the packages used require root access to use the hardware (GPIO) pins. UV creates an enclosed environment that prevents the ability to run as root. This is a safety guard and if allowed to reach root, there are conflicts within the core functions that will break the code. In the end I abandoned the use of a packaging system. In a trade-off for neat organization, I employ direct control by running as root to access the packages saved in the system. Once again, as this is a small device, it is not abnormal to structure a project in this fashion. 
+At the beginning of refactoring the code and files, I aimed to use uv astral to help structure the project, which uv did create a clean space to work off of, but I encountered an issue with using it in this system. Some of the packages used require root access to use the hardware (GPIO) pins. UV creates an enclosed environment that prevents the ability to run as root. This is a safety guard and if allowed to reach root, there are conflicts within the core functions that will break the code. In the end I abandoned the use of a packaging system. In a trade-off for neat organization, I employ direct control by running as root to access the packages saved in the system. Once again, as this is a small device, it is not abnormal to structure a project in this fashion.
+Another satisfied outcome is security of the project. There is only a single user that is able to connect through ssh login, providing simple security.
