@@ -35,7 +35,7 @@ class TemperatureMachine(StateMachine):
 
 > A necessity to solder after a chip burn out, my first time.
 
-![Attempt # 2](docs/images/solder2.jpg)
+![Attempt # 2](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/solder2.jpg)
 
 > The second round came out a little bit better.
 
