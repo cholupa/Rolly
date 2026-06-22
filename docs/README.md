@@ -64,7 +64,7 @@ Software engineering is one of the main facets of Computer Science and was imple
 
 
 
-![The Final Product](https://github.com/cholupa/Rolly/blob/main/docs/images/RollyFinal.jpg)
+![The Final Product](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/RollyFinal.jpg)
 
 >The final Robot
 
