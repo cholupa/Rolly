@@ -44,14 +44,14 @@ def main():
         if stepCount <= 10:
             turn, distance = None, None
             try:
-                print("Running bot loop")
-                bot.run()
                 if bot.stepReady:
                     turn, distance = bot.packAction()
                     print(f"packaction returned - turn{turn}, distance - {distance}")
                     bot.stepReady = False
                     stepCount += 1
-                    sleep(1)
+                    sleep(0.5)
+                else:
+                    bot.run()
             except(KeyboardInterrupt,MemoryError):
                 repeat = False
                 print("Cleaning up")
