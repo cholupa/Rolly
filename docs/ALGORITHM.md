@@ -9,7 +9,7 @@ title: Algorithm Enhancement
   The algorithms used created in this enhancement are primarily for the motion of the robot. The original artifact was a part of the Thermostat.py file, the state machine. A finite state machine was developed for this project to control what actions the robot is supposed to take dependent on its current location in respect to open spaces.
 
 > Thermostat lighting update
-> Link to full file [rolly file](https://github.com/cholupa/Rolly/blob/main/Thermostat.py)
+> Link to full file [Thermostat](https://github.com/cholupa/Rolly/blob/main/Thermostat.py)
 
 ```python
    def updateLights(self):
@@ -53,7 +53,7 @@ title: Algorithm Enhancement
   
   The main purpose of this enhancement was to create a new state machine and a way to display the data in  a meaningful way. For the robot, instead of reacting to temperature, the driver for action is reaction to distance. The echo sensor reads distances up to ~800 cm. When the robot rolls to a threshold distance (20cm) then the robot will switch to a state of sweeping. During the sweeping the sensor turns via the servo motor to the left and right, recording a distance each time. From there, if at least 1 side is above the threshold, then it will move in that valid direction. This routine goes on for a predetermined number of steps and finishes the route. These steps are recorded into a dictionary pair, the main data structure of the program and written into the database. This is the primary algorithm for the program.
 
-  > Link to full file [rolly file](https://github.com/cholupa/Rolly/blob/main/rolly.py)
+  > Link to full file [rolly](https://github.com/cholupa/Rolly/blob/main/rolly.py)
 
   ```python
  def run(self):
@@ -79,7 +79,7 @@ title: Algorithm Enhancement
 The other side of this enhancement was how to display the information from the run. The bot doesn't have a viable way for a display, so I decided to send the data to my local computer using a simple socket server. I selected a client/server section of the application mainly to get more practice in learning about networking. This is especially so with using bare bones libraries like socket in Python. Adding a networking block in the program allows me to use the data gathered from the robot. The Turtle application is the software used to draw the pathways. The server side contains the Turtle program to draw the actions of the robot.
 
 > A basic Python dictionary is used in mapping the data to keys within the database record creation.
-
+> Database file [db](https://github.com/cholupa/Rolly/blob/main/db.py)
 ```python
 
     def create(con, pathNum, stepNum, distance, turn, stamp):
