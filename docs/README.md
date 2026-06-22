@@ -57,13 +57,18 @@ Security often isn’t the first thing you think about in development but it sho
 
 Software engineering is one of the main facets of Computer Science and was implemented throughout the coursework. One of the first things we learned about is the software development life cycle, where you plan, design, build, test, and maintain. This cycle is neverending and will always need improvements, and is no exception to my coursework. The cycle encompasses all of the other topics previously discussed. The following sections will introduce and show how these understanding turned a Raspberry Pi into a functioning robot.
 
-# THE CODE REVIEW
+# The Code Review
 [My Code Review](https://youtu.be/pK0HTqThThI)
 
+> A link to the code review video.
 
-## Introdution to Rolly
+
 
 ![The Final Product](https://github.com/cholupa/Rolly/blob/main/docs/images/RollyFinal.jpg)
+
+>The final Robot
+
+## Introdution to Rolly
 
 The primary artifact referenced throughout this project is a thermostat state machine that reads a temperature from an attached sensor. This was a project from the course CS350: *Emerging Systems, Architectures & Technologies*. Button inputs set a target temperature and change the state to cool, heat or off and manipulate LEDs as an output for a user to tell what is currently happening within the state. This was written in Python and is the basis for the design and data structure categories of the enhancements. The database category did not have any previous artifact and was built from the ground up. Instead of working on separate projects to complete the enhancements, they are combined into a singular project that satisfies all categories. This is the Rolly project. Rolly is an autonomous robot that moves in a direction, senses obstructions, and moves to a new valid direction. The thermostat artifact acts as the foundation for the hardware and structure, and the database layer records the robot actions.
 
@@ -80,9 +85,9 @@ The primary artifact referenced throughout this project is a thermostat state ma
 #### DATABASE
 [Go to Database](DATABASES.md)
 
-# THE TAKEAWAY
+# The Takeaway
 
-This program has taught me a lot in the concepts of what it means to be a computer scientist. One lesson is that you can't know everything. Unserstanding the key fundamentals in data structures, life cycle and flow, and security are the main concepts to become strong in first and the rest of the frameworks and software tools come later. I am always eager to learn more and hope to continue this as a profession in the near future.
+This program has taught me a lot in the concepts of what it means to be a computer scientist. One lesson is that you can't know everything. Understanding the key fundamentals in data structures, life cycle and flow, and security are the main concepts to become strong in first and the rest of the frameworks and software tools come later. I am always eager to learn more and hope to continue this as a profession in the near future.
 
 DH
 
