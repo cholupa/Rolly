@@ -229,7 +229,7 @@ class Rolly(StateMachine):
     leftDistance = 0
     rightDistance = 0
     turn = None
-    # Able vairables are to tell if a direction is valid or not
+    # Able variables are to tell if a direction is valid or not
     leftAble = False
     rightAble = False
     # the minimum distance that the robot can travel until it is officially obstructed
