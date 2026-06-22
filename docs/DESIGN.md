@@ -31,7 +31,7 @@ class TemperatureMachine(StateMachine):
     cool = State()
 ```
 ## Enhancement
-![A first time soldering](docs/images/solder1.jpg)
+![A first time soldering](https://raw.githubusercontent.com/cholupa/Rolly/main/docs/images/solder1.jpg)
 
 > A necessity to solder after a chip burn out, my first time.
 
