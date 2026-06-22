@@ -24,10 +24,10 @@ title: Database Enhancement
         return con.hgetall(key)
 ```
 
-
+![A path drawn on Turtle using received values])(https://github.com/cholupa/Rolly/blob/main/db.py)
 
 ## Outcome
 
-  As simple databases are in concept, they are a difficult software to become efficient in. I believe in this enhancement I was able to develop code that is on par with best practices and maintaining adequate security. The Redis software is a perfect tool for this type of project and I maintained security by keeping a separation of concerns with database interactions. The simplest security is to prevent injections by never hardcoding values. It is also because this project is a local project on a physical device, there is inherent security in actually having hands on the product.
+  As simple databases are in concept, they can be difficult to implement efficiently. I believe in this enhancement I was able to develop code that is on par with best practices and maintaining adequate security. The Redis software is a perfect tool for this type of project and I maintained security by keeping a separation of concerns with database interactions. The simplest security is to prevent injections by never hardcoding values. It is also because this project is a local project on a physical device, there is inherent security in actually having hands on the product.
  
   As always with a project, learning new frameworks is a grinding process. I was constantly rereading documentation and dealing with errors in setting up the data in the creation side of the records for Redis. It is actually very simple but sometimes when these things are deceptively easy, they can be tough at times. That was the main challenge encountered and it has been overcome. There’s plenty more to learn from using Redis, but I do not know if any more is strictly necessary in this project. Any more work will be a combination of the algorithm of pathfinding and altering how the data is added. I did learn that database work is especially difficult at first, but it is one of those things where it needs to be hammered into the brain.
